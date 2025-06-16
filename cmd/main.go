@@ -44,7 +44,7 @@ func main() {
 	ctx := context.Background()
 	handler := &kafka.ConsumerGroupHandler{Ch: client}
 	for {
-		err := consumerGroup.Consume(ctx, envCfg.KafkaTopic, handler)
+		err := consumerGroup.Consume(ctx, envCfg.KafkaTopics, handler)
 		if err != nil {
 			log.Printf("Error from consumerGroup: %v", err)
 			panic(err)
