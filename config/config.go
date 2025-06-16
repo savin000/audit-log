@@ -11,7 +11,7 @@ type Config struct {
 
 	KafkaAddresses     []string `env:"KAFKA_ADDRESSES" envDefault:"localhost:9092" envSeparator:","`
 	KafkaGroupID       string   `env:"KAFKA_GROUP_ID" envDefault:"audit-log-default-consumer"`
-	KafkaTopic         []string `env:"KAFKA_TOPIC" envDefault:"default.audit.log"`
+	KafkaTopics        []string `env:"KAFKA_TOPICS" envDefault:"default.audit.log" envSeparator:","`
 	ClickhouseHost     string   `env:"CLICKHOUSE_HOST" envDefault:"localhost"`
 	ClickhousePort     uint32   `env:"CLICKHOUSE_PORT" envDefault:"9000"`
 	ClickhouseDatabase string   `env:"CLICKHOUSE_DATABASE" envDefault:"default"`
