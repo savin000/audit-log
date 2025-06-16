@@ -2,21 +2,25 @@ package main
 
 import (
 	"context"
+	"github.com/savin000/audit-log/config"
 	"github.com/savin000/audit-log/internal/clickhouse"
 	"github.com/savin000/audit-log/internal/kafka"
 	"log"
 )
 
 func main() {
-	brokers := []string{"localhost:9092"}
-	groupID := "default-group"
-	topic := []string{"audit-logs"}
+	envCfg, err := config.Get()
+
+	if err != nil {
+		log.Fatalf("Failed to get environment variables: %v", err)
+	}
+
 	cfg := clickhouse.Config{
-		Host:     "localhost",
-		Port:     9000,
-		Database: "default",
-		Username: "clickuser",
-		Password: "clickpassword",
+		Host:     envCfg.ClickhouseHost,
+		Port:     envCfg.ClickhousePort,
+		Database: envCfg.ClickhouseDatabase,
+		Username: envCfg.ClickhouseUsername,
+		Password: envCfg.ClickhousePassword,
 	}
 
 	client, err := clickhouse.New(cfg)
@@ -30,7 +34,7 @@ func main() {
 		log.Fatalf("Failed to create AuditLog table: %v", err)
 	}
 
-	consumerGroup, err := kafka.NewConsumerGroup(brokers, groupID)
+	consumerGroup, err := kafka.NewConsumerGroup(envCfg.KafkaAddresses, envCfg.KafkaGroupID)
 
 	if err != nil {
 		log.Fatalf("Kafka error: %v", err)
@@ -39,9 +43,8 @@ func main() {
 
 	ctx := context.Background()
 	handler := &kafka.ConsumerGroupHandler{Ch: client}
-
 	for {
-		err := consumerGroup.Consume(ctx, topic, handler)
+		err := consumerGroup.Consume(ctx, envCfg.KafkaTopic, handler)
 		if err != nil {
 			log.Printf("Error from consumerGroup: %v", err)
 			panic(err)
