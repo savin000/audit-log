@@ -36,11 +36,11 @@ func (handler *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 	return nil
 }
 
-func NewConsumerGroup(brokers []string, groupID string) (sarama.ConsumerGroup, error) {
+func NewConsumerGroup(addrs []string, groupID string) (sarama.ConsumerGroup, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.AutoCommit.Enable = true
 
-	consumerGroup, err := sarama.NewConsumerGroup(brokers, groupID, config)
+	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, config)
 	if err != nil {
 		return nil, err
 	}
