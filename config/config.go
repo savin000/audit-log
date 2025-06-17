@@ -5,10 +5,6 @@ import (
 )
 
 type Config struct {
-	Port     string `env:"APP_PORT" envDefault:"8080"`
-	DBUrl    string `env:"DATABASE_URL" envDefault:"postgres://user:pass@localhost:5432/mydb"`
-	LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
-
 	KafkaAddresses     []string `env:"KAFKA_ADDRESSES" envDefault:"localhost:9092" envSeparator:","`
 	KafkaGroupID       string   `env:"KAFKA_GROUP_ID" envDefault:"audit-log-default-consumer"`
 	KafkaTopics        []string `env:"KAFKA_TOPICS" envDefault:"default.audit.log" envSeparator:","`
