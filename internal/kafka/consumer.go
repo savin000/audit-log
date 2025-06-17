@@ -26,7 +26,7 @@ func (handler *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 			log.Fatalf("Error reading message: %v", err)
 		}
 
-		err = handler.Ch.AddAuditLog(msg.Offset, logEntry)
+		err = handler.Ch.AddAuditLog(logEntry)
 		if err != nil {
 			log.Fatalf("Failed to insert into ClickHouse: %v", err)
 		} else {
