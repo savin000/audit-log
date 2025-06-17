@@ -59,7 +59,6 @@ func (c *Client) CreateAuditLogTable() error {
 	ctx := context.Background()
 	err := c.conn.Exec(ctx, `
         CREATE TABLE IF NOT EXISTS audit_logs (
-            id UInt64,
             user String,
             action String,
             type String,
@@ -73,14 +72,13 @@ func (c *Client) CreateAuditLogTable() error {
 	return err
 }
 
-func (c *Client) AddAuditLog(offset int64, auditLog AuditLog) error {
+func (c *Client) AddAuditLog(auditLog AuditLog) error {
 	ctx := context.Background()
 	query := `
-        INSERT INTO audit_logs (id, user, action, type, metadata, service, created)
+        INSERT INTO audit_logs (user, action, type, metadata, service, created)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `
 	err := c.conn.Exec(ctx, query,
-		offset,
 		auditLog.User,
 		auditLog.Action,
 		auditLog.Type,
