@@ -19,20 +19,20 @@ func (handler *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSe
 	for msg := range claim.Messages() {
 		log.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(msg.Value), msg.Timestamp, msg.Topic)
 
-		var logEntry clickhouse.AuditLog
-		err := json.Unmarshal(msg.Value, &logEntry)
-
+		var auditLog clickhouse.AuditLog
+		err := json.Unmarshal(msg.Value, &auditLog)
 		if err != nil {
 			log.Fatalf("Error reading message: %v", err)
 		}
 
-		err = handler.Ch.AddAuditLog(logEntry)
+		err = handler.Ch.AddAuditLog(auditLog)
 		if err != nil {
 			log.Fatalf("Failed to insert into ClickHouse: %v", err)
 		} else {
 			session.MarkMessage(msg, "")
 		}
 	}
+
 	return nil
 }
 

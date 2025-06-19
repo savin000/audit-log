@@ -39,7 +39,6 @@ func New(cfg Config) (*Client, error) {
 			Password: cfg.Password,
 		},
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +65,7 @@ func (c *Client) CreateAuditLogTable() error {
             service String,
             created DateTime
         ) ENGINE = MergeTree()
-        ORDER BY id
+        ORDER BY created
     `)
 
 	return err
@@ -76,7 +75,7 @@ func (c *Client) AddAuditLog(auditLog AuditLog) error {
 	ctx := context.Background()
 	query := `
         INSERT INTO audit_logs (user, action, type, metadata, service, created)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     `
 	err := c.conn.Exec(ctx, query,
 		auditLog.User,
