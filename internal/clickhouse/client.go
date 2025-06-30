@@ -88,3 +88,28 @@ func (c *Client) AddAuditLog(auditLog AuditLog) error {
 
 	return err
 }
+
+func (c *Client) GetAuditLogs(limit, offset int) ([]AuditLog, error) {
+	ctx := context.Background()
+	query := `
+        SELECT *
+        FROM audit_logs
+        ORDER BY created DESC
+        LIMIT ? OFFSET ?
+    `
+	rows, err := c.conn.Query(ctx, query, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+
+	var auditLogs []AuditLog
+	for rows.Next() {
+		var auditLog AuditLog
+		if err := rows.Scan(&auditLog.User, &auditLog.Action, &auditLog.Type, &auditLog.Metadata, &auditLog.Service, &auditLog.Created); err != nil {
+			return nil, fmt.Errorf("scan failed: %w", err)
+		}
+		auditLogs = append(auditLogs, auditLog)
+	}
+
+	return auditLogs, nil
+}
