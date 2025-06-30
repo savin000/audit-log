@@ -2,10 +2,17 @@ package main
 
 import (
 	"context"
+	"github.com/savin000/audit-log/internal/server"
+	"github.com/savin000/audit-log/internal/server/handlers"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
 	"github.com/savin000/audit-log/config"
 	"github.com/savin000/audit-log/internal/clickhouse"
 	"github.com/savin000/audit-log/internal/kafka"
-	"log"
 )
 
 func main() {
@@ -41,11 +48,31 @@ func main() {
 
 	ctx := context.Background()
 	handler := &kafka.ConsumerGroupHandler{Ch: client}
-	for {
-		err := consumerGroup.Consume(ctx, cfg.KafkaTopics, handler)
-		if err != nil {
-			log.Printf("Error from consumerGroup: %v", err)
-			panic(err)
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		for {
+			err := consumerGroup.Consume(ctx, cfg.KafkaTopics, handler)
+			if err != nil {
+				log.Fatalf("Error from consumerGroup: %v", err)
+			}
 		}
-	}
+	}()
+
+	go func() {
+		h := &handlers.Handler{Ch: client}
+		httpServer := server.New(cfg.ServerPort, h)
+		err := httpServer.ListenAndServe()
+		if err != nil {
+			log.Fatalf("Http server error: %v", err)
+		}
+	}()
+
+	<-stop
+	wg.Wait()
 }
