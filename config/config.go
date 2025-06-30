@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
+	ServerPort         uint32   `env:"SERVER_PORT" envDefault:"8080"`
 	KafkaAddresses     []string `env:"KAFKA_ADDRESSES" envDefault:"localhost:9092" envSeparator:","`
 	KafkaGroupID       string   `env:"KAFKA_GROUP_ID" envDefault:"audit-log-default-consumer"`
 	KafkaTopics        []string `env:"KAFKA_TOPICS" envDefault:"default.audit.log" envSeparator:","`
