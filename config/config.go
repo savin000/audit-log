@@ -9,6 +9,8 @@ type Config struct {
 	KafkaAddresses     []string `env:"KAFKA_ADDRESSES" envDefault:"localhost:9092" envSeparator:","`
 	KafkaGroupID       string   `env:"KAFKA_GROUP_ID" envDefault:"audit-log-default-consumer"`
 	KafkaTopics        []string `env:"KAFKA_TOPICS" envDefault:"default.audit.log" envSeparator:","`
+	DLQEnabled         bool     `env:"DLQ_ENABLED" envDefault:"true"`
+	DLQTopic           string   `env:"DLQ_TOPIC" envDefault:"default.audit.log.dlq"`
 	ClickhouseHost     string   `env:"CLICKHOUSE_HOST" envDefault:"localhost"`
 	ClickhousePort     uint32   `env:"CLICKHOUSE_PORT" envDefault:"9000"`
 	ClickhouseDatabase string   `env:"CLICKHOUSE_DATABASE" envDefault:"default"`
