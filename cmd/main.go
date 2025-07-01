@@ -46,8 +46,14 @@ func main() {
 	}
 	defer func() { _ = consumerGroup.Close() }()
 
+	producer, err := kafka.NewProducer(cfg.KafkaAddresses)
+	if err != nil {
+		log.Fatalf("Kafka error: %v", err)
+	}
+	defer func() { _ = producer.Close() }()
+
 	ctx := context.Background()
-	handler := &kafka.ConsumerGroupHandler{Ch: client}
+	handler := &kafka.ConsumerGroupHandler{Ch: client, DLQEnabled: cfg.DLQEnabled, DLQTopic: cfg.DLQTopic, DLQProducer: producer}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)

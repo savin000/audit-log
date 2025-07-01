@@ -2,34 +2,48 @@ package kafka
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/savin000/audit-log/internal/clickhouse"
 	"log"
 )
 
 type ConsumerGroupHandler struct {
-	Ch *clickhouse.Client
+	Ch          *clickhouse.Client
+	DLQEnabled  bool
+	DLQTopic    string
+	DLQProducer *Producer
 }
 
-func (handler *ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
+func (h *ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error { return nil }
 
-func (handler *ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+func (h *ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
 
-func (handler *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (h *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.Printf("Message claimed: value = %s, timestamp = %v, topic = %s", string(msg.Value), msg.Timestamp, msg.Topic)
 
 		var auditLog clickhouse.AuditLog
 		err := json.Unmarshal(msg.Value, &auditLog)
 		if err != nil {
-			log.Fatalf("Error reading message: %v", err)
-		}
+			if h.DLQEnabled {
+				msg := &sarama.ProducerMessage{
+					Topic: h.DLQTopic,
+					Key:   sarama.StringEncoder(msg.Key),
+					Value: sarama.StringEncoder(msg.Value),
+				}
 
-		err = handler.Ch.AddAuditLog(auditLog)
-		if err != nil {
-			log.Fatalf("Failed to insert into ClickHouse: %v", err)
+				h.DLQProducer.SendMessage(msg)
+			} else {
+				return fmt.Errorf("error reading message: %w", err)
+			}
 		} else {
 			session.MarkMessage(msg, "")
+		}
+
+		err = h.Ch.AddAuditLog(auditLog)
+		if err != nil {
+			return fmt.Errorf("failed to insert into ClickHouse: %w", err)
 		}
 	}
 
