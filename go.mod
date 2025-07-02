@@ -6,6 +6,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.36.0
 	github.com/IBM/sarama v1.45.2
 	github.com/caarlos0/env/v11 v11.3.1
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
@@ -15,6 +16,7 @@ require (
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/paulmach/orb v0.11.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
