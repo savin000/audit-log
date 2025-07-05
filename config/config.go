@@ -19,8 +19,6 @@ type Config struct {
 }
 
 func Get() (*Config, error) {
-	cfg := Config{}
-
 	cfg, err := env.ParseAs[Config]()
 	if err != nil {
 		return nil, err
