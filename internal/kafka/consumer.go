@@ -4,8 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/IBM/sarama"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/savin000/audit-log/internal/clickhouse"
 	"log"
+)
+
+var (
+	auditLogsTotal = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "audit_logs_total",
+		Help: "Total number of saved audit logs",
+	})
 )
 
 type ConsumerGroupHandler struct {
@@ -44,6 +53,8 @@ func (h *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession,
 		err = h.Ch.AddAuditLog(auditLog)
 		if err != nil {
 			return fmt.Errorf("failed to insert into ClickHouse: %w", err)
+		} else {
+			auditLogsTotal.Inc()
 		}
 	}
 
